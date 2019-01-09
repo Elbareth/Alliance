@@ -21,7 +21,7 @@ public class BazaDanych {
     public BazaDanych(){
         try{
             Class.forName("org.h2.Driver");
-            connect = DriverManager.getConnection("jdbc:h2:file:~/test;USER=ROOT;PASSWORD=Focus7341Canson");          
+            connect = DriverManager.getConnection("jdbc:h2:file:~/test;USER=ROOT;PASSWORD=haslo");          
         }
         catch(ClassNotFoundException e){
             e.printStackTrace();
