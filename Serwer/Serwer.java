@@ -107,7 +107,26 @@ public class Serwer{
                             wyslij.println("Wszystko ok");
                             wyslij.flush();
                         }
-                    }   
+                    } 
+                    if(tmp[0].equals("IleKosztuje")){                        
+                        String sql = "SELECT * FROM ALLIANCE."+tmp[1]+" WHERE ID = '"+tmp[2]+"';";
+                        wyslij.println(db.surowce(sql,tmp[1]));
+                        wyslij.flush();
+                    }
+                    if(tmp[0].equals("Upload")){
+                        //Uaktualnia ile mam surowcow w magazynie
+                        //Ile mam teraz na godzine
+                        //I gdzie znajduje sie pole
+                        System.out.println("Upload");
+                        db.updatePole(Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3]), Integer.parseInt(tmp[4]), tmp[6], tmp[5], nazwa);
+                        wyslij.println(db.zwroc("SELECT * FROM ALLIANCE.UZYTKOWNIK WHERE LOGIN ='"+nazwa+"';"));
+                        wyslij.flush();
+                    }
+                    if(tmp[0].equals("Informacja")){
+                        String sql = "SELECT * FROM ALLIANCE."+tmp[1].toUpperCase()+" WHERE ID = "+tmp[2];
+                        wyslij.println(db.opis(sql));
+                        wyslij.flush();
+                    }
                 }
             }
             catch(IOException e){
