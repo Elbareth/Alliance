@@ -13,6 +13,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -135,6 +136,7 @@ public class PolaSurowcow extends JPanel{
         pole24.setName("POLE24");
         this.wyslij = wyslij;
         this.odbierz = odbierz;
+        //Gdy to nie bedzie dzialac stworz obiekt wiadomoscserwer!
         this.linia = linia;  
         System.out.println(linia);
         tmp = linia.split("@");        
@@ -185,7 +187,7 @@ public class PolaSurowcow extends JPanel{
         add(panel1); 
         add(Box.createRigidArea(new Dimension(0,20)));
         powitanie = new JLabel("Witaj "+tmp[0]+"!");
-        powitanie.setFont(new Font("Maiandra GD zwykła",Font.BOLD,20));
+        powitanie.setFont(new Font("Lucida Handwriting kursywa",Font.BOLD,20));
         add(powitanie);
         
         add(Box.createRigidArea(new Dimension(0,20)));
@@ -210,6 +212,7 @@ public class PolaSurowcow extends JPanel{
         setPola(pole12,poziom12,tmp[43]);
         osada = new JButton(new ImageIcon(this.getClass().getResource("miniOsada.png")));
         osada.setPreferredSize(new Dimension(100,100));
+        osada.addActionListener(new OsadaAL());
         grid.add(osada);
         setPola(pole13,poziom13,tmp[44]);
         setPola(pole14,poziom14,tmp[45]);
@@ -232,25 +235,25 @@ public class PolaSurowcow extends JPanel{
         drewno2 = new JLabel(new ImageIcon(this.getClass().getResource("drewnoMini.png")));
         drewno2.setPreferredSize(new Dimension(30,30));
         surowce.add(drewno2);
-        iloscDrewna = new JLabel("Produkcja na godzinę: "+tmp[13].toString());        
+        iloscDrewna = new JLabel("Produkcja na godzinę: "+tmp[12].toString());        
         iloscDrewna.setPreferredSize(new Dimension(200,50));
         surowce.add(iloscDrewna);        
         glina2 = new JLabel(new ImageIcon(this.getClass().getResource("glinaMini.png")));
         glina2.setPreferredSize(new Dimension(30,30));
         surowce.add(glina2);
-        iloscGliny = new JLabel("Produkcja na godzinę: "+tmp[14].toString());
+        iloscGliny = new JLabel("Produkcja na godzinę: "+tmp[13].toString());
         iloscGliny.setPreferredSize(new Dimension(200,50));
         surowce.add(iloscGliny);
         zelazo2 = new JLabel(new ImageIcon(this.getClass().getResource("zelazoMini.png")));
         zelazo2.setPreferredSize(new Dimension(30,30));
         surowce.add(zelazo2);
-        iloscZelaza = new JLabel("Produkcja na godzinę: "+tmp[15].toString());
+        iloscZelaza = new JLabel("Produkcja na godzinę: "+tmp[14].toString());
         iloscZelaza.setPreferredSize(new Dimension(200,50));
         surowce.add(iloscZelaza);
         zboze2 = new JLabel(new ImageIcon(this.getClass().getResource("zbozeMini.png")));
         zboze2.setPreferredSize(new Dimension(30,30));
         surowce.add(zboze2);
-        iloscZboza = new JLabel("Produkcja na godzinę: "+tmp[16].toString());
+        iloscZboza = new JLabel("Produkcja na godzinę: "+tmp[15].toString());
         iloscZboza.setPreferredSize(new Dimension(200,50));
         surowce.add(iloscZboza);
         panel2.add(surowce);
@@ -271,21 +274,25 @@ public class PolaSurowcow extends JPanel{
             pole.setIcon(new ImageIcon(this.getClass().getResource("drewno.jpg")));
             pole.setContentAreaFilled(true);
             poziom = Integer.parseInt(tmp);
+            pole.addActionListener(new TmpSurowce(linia, pole, tak, poziom));
         }
         if(tak.equals("Glina")){
             pole.setIcon(new ImageIcon(this.getClass().getResource("glina.jpg")));
             pole.setContentAreaFilled(true);
             poziom = Integer.parseInt(tmp);
+            pole.addActionListener(new TmpSurowce(linia, pole, tak, poziom));
         }
         if(tak.equals("Zelazo")){
             pole.setIcon(new ImageIcon(this.getClass().getResource("zelazo.jpg")));
             pole.setContentAreaFilled(true);
             poziom = Integer.parseInt(tmp);
+            pole.addActionListener(new TmpSurowce(linia, pole, tak, poziom));
         }
         if(tak.equals("Zboze")){
             pole.setIcon(new ImageIcon(this.getClass().getResource("zboze.jpg")));
             pole.setContentAreaFilled(true);
             poziom = Integer.parseInt(tmp);
+            pole.addActionListener(new TmpSurowce(linia, pole, tak, poziom));
         }
         if(tak.equals("brak")){            
             pole.addActionListener(new BrakSurowca(linia, pole));
@@ -307,6 +314,55 @@ public class PolaSurowcow extends JPanel{
             parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, PolaSurowcow.this);
             parent.getContentPane().removeAll();            
             parent.add(new Pole(wyslij, odbierz,linia,button.getName()));
+            parent.validate();
+            parent.repaint();
+        }        
+    }
+    class Watek implements Runnable{
+        @Override
+        public void run() {
+            String linia = "";
+            try{
+                while((linia=odbierz.readLine())!=null){
+                    String [] tmp = linia.split("@");
+                    if(tmp.length > 55){
+                        PolaSurowcow.this.linia = linia;
+                    }
+                }
+            }
+            catch(IOException e){
+                e.printStackTrace();
+            }
+        }        
+    }
+    class TmpSurowce implements ActionListener{
+        String linia;
+        JButton button;
+        String rodzaj;
+        Integer poziom;
+
+        public TmpSurowce(String linia, JButton button, String rodzaj, Integer poziom) {
+            this.linia = linia;
+            this.button = button;
+            this.rodzaj = rodzaj;
+            this.poziom = poziom;
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, PolaSurowcow.this);
+            parent.getContentPane().removeAll();            
+            parent.add(new Surowce(wyslij, odbierz, linia, poziom, rodzaj, button.getName()));
+            parent.validate();
+            parent.repaint();
+        }        
+    }
+    class OsadaAL implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, PolaSurowcow.this);
+            parent.getContentPane().removeAll();            
+            parent.add(new Osada(wyslij, odbierz, linia));
             parent.validate();
             parent.repaint();
         }        

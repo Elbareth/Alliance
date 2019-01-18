@@ -17,6 +17,8 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -32,27 +34,27 @@ import javax.swing.SwingUtilities;
  *
  * @author lenovo
  */
-//Wprowadz watek od sluchania komunikacji
-public class Logowanie extends JPanel{
+//Shaszuj haslo
+//I zrob sprawdzanie czy juz taki uzytkownik istnieje
+public class Zarejestruj extends JPanel{
     private JPanel panel1;
     private JPanel panel2;
     private JPanel panel3;
     private JLabel login;
     private JLabel haslo;
+    private JLabel reHaslo;
     private JTextField wprowadzLogin;
     private JPasswordField wprowadzHaslo;
-    private JButton zaloguj;
+    private JPasswordField wprowadzReHaslo;
     private JButton zarejestruj;
-    private JLabel tekst;
-    private JFrame parent;
     private BufferedReader odbierz;
     private PrintWriter wyslij;
-    private Thread wat;
-    public Logowanie(PrintWriter wyslij, BufferedReader odbierz){
+    private JFrame parent;
+    public Zarejestruj(PrintWriter wyslij, BufferedReader odbierz){
         this.wyslij = wyslij;
         this.odbierz = odbierz;
-        wat = new Thread(new Watek());
-        wat.start();
+        Thread wat = new Thread(new Watek());
+        wat.start();       
         setSize(500,500);
         setLayout(new BoxLayout(this,BoxLayout.PAGE_AXIS));
         add(Box.createRigidArea(new Dimension(50,50)));
@@ -68,11 +70,10 @@ public class Logowanie extends JPanel{
         panel1.add(wprowadzLogin);
         add(panel1);
         
-        add(Box.createRigidArea(new Dimension(0,10)));
         panel2 = new JPanel();
         panel2.setLayout(new FlowLayout());
         panel2.setAlignmentX(Component.CENTER_ALIGNMENT);
-        haslo = new JLabel("Haslo: ");
+        haslo = new JLabel("Hasło:");
         haslo.setMaximumSize(new Dimension(150,30));
         wprowadzHaslo = new JPasswordField();
         wprowadzHaslo.setPreferredSize(new Dimension(150,30));
@@ -81,77 +82,69 @@ public class Logowanie extends JPanel{
         panel2.add(wprowadzHaslo);
         add(panel2);
         
-        add(Box.createRigidArea(new Dimension(0,10)));
-        zaloguj = new JButton("Zaloguj się");
-        zaloguj.setPreferredSize(new Dimension(150,50));
-        zaloguj.addActionListener(new LogIn());
-        add(zaloguj);
-        
-        add(Box.createRigidArea(new Dimension(0,30)));
         panel3 = new JPanel();
         panel3.setLayout(new FlowLayout());
         panel3.setAlignmentX(Component.CENTER_ALIGNMENT);
-        tekst = new JLabel("Nie masz jeszcze u nas konta?");
-        tekst.setPreferredSize(new Dimension(200,30));
-        zarejestruj = new JButton("Zarejestruj się");
-        zarejestruj.setPreferredSize(new Dimension(150,30));
-        zarejestruj.addActionListener(new Rejestr());
-        panel3.add(tekst);
+        reHaslo = new JLabel("Powtórz hasło:");
+        reHaslo.setMaximumSize(new Dimension(150,30));
+        wprowadzReHaslo = new JPasswordField();
+        wprowadzReHaslo.setPreferredSize(new Dimension(150,30));
+        panel3.add(reHaslo);
         panel3.add(Box.createRigidArea(new Dimension(30,0)));
-        panel3.add(zarejestruj); 
+        panel3.add(wprowadzReHaslo);
         add(panel3);
+        
+        add(Box.createRigidArea(new Dimension(0,10)));
+        zarejestruj = new JButton("Zarejestruj się");
+        zarejestruj.setPreferredSize(new Dimension(150,50));
+        zarejestruj.addActionListener(new Rejestr());
+        add(zarejestruj);
     }
     class Rejestr implements ActionListener{
         @Override
         public void actionPerformed(ActionEvent e) {
-            parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, Logowanie.this);
-            parent.getContentPane().removeAll();            
-            parent.add(new Zarejestruj(wyslij, odbierz));
-            parent.validate();
-            parent.repaint();
-        }        
-    }
-    class LogIn implements ActionListener{
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            try{
-                //Przesyla informacje do serwera a ten do bazy  
-                MessageDigest md = MessageDigest.getInstance("SHA-256"); 
-                byte[] messageDigest = md.digest(Arrays.toString(wprowadzHaslo.getPassword()).getBytes()); 
-                BigInteger no = new BigInteger(1, messageDigest);
-                String hashtext = no.toString(16); 
-                String tmp = "Logowanie@"+wprowadzLogin.getText()+"@"+hashtext;
-                wyslij.println(tmp);
-                wyslij.flush();
-                wprowadzLogin.setText("");
-                wprowadzHaslo.setText("");               
-                //Gdy wszystko ok to otwiera sie okienko gry i dostaje od serwera tone info
-                //Gdy nie ok wyswietla komunikat
+            if(wprowadzLogin.getText().equals("")||wprowadzHaslo.getPassword().length==0||wprowadzReHaslo.getPassword().length==0){
+                JOptionPane.showMessageDialog(null, "Wprowadź wszystkie wymagane pola!");                
             }
-            catch (NoSuchAlgorithmException ex) { 
-                ex.printStackTrace();
-            }  
+            if(!Arrays.equals(wprowadzHaslo.getPassword(), wprowadzReHaslo.getPassword())){
+                JOptionPane.showMessageDialog(null,"Podane hasła muszą być równe");                
+            }
+            if(wprowadzLogin.getText().length()<4||wprowadzHaslo.getPassword().length<8||wprowadzReHaslo.getPassword().length<8){
+                JOptionPane.showMessageDialog(null,"Login musi zawierać co najmniej 4 znaki a hasło co najmniej 8");               
+            }
+            else{
+                try{
+                    MessageDigest md = MessageDigest.getInstance("SHA-256"); 
+                    byte[] messageDigest = md.digest(Arrays.toString(wprowadzHaslo.getPassword()).getBytes()); 
+                    BigInteger no = new BigInteger(1, messageDigest);
+                    String hashtext = no.toString(16); 
+                    String tmp = "Rejestracja@"+wprowadzLogin.getText()+"@"+hashtext;
+                    wyslij.println(tmp);
+                    wyslij.flush();                   
+                } 
+                catch (NoSuchAlgorithmException ex) { 
+                    ex.printStackTrace();
+                }             
+            }
         }        
     }
     class Watek implements Runnable{
         @Override
         public void run() {
-            String linia ="";            
+            String linia = "";
             try{
                 while((linia=odbierz.readLine())!=null){
-                    if(linia.equals("Brak")){
-                        JOptionPane.showMessageDialog(null,"Podałeś zły login lub hasło");
+                    if(linia.equals("Uzytkownik istnieje")){
+                        JOptionPane.showMessageDialog(null,"Użytkownik o takiej nazwie już istnieje");                        
                     }
-                    else{                        
-                        parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, Logowanie.this);
+                    if(linia.equals("Wszystko ok")){
+                        parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, Zarejestruj.this);
                         parent.getContentPane().removeAll();            
-                        parent.add(new PolaSurowcow(wyslij, odbierz,linia));
-                        parent.setSize(1600, 900);
+                        parent.add(new Logowanie(wyslij, odbierz));
                         parent.validate();
-                        parent.repaint(); 
-                        //Thread.currentThread().interrupt();
-                        Thread.currentThread().stop();
-                    }
+                        parent.repaint();
+                    
+                    }                   
                 }
             }
             catch(IOException e){
