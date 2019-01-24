@@ -117,7 +117,7 @@ public class Serwer{
                         //Uaktualnia ile mam surowcow w magazynie
                         //Ile mam teraz na godzine
                         //I gdzie znajduje sie pole
-                        System.out.println("Upload");
+                        //System.out.println("Upload");
                         db.updatePole(Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3]), Integer.parseInt(tmp[4]), tmp[6], tmp[5], nazwa);
                         wyslij.println(db.zwroc("SELECT * FROM ALLIANCE.UZYTKOWNIK WHERE LOGIN ='"+nazwa+"';"));
                         wyslij.flush();
@@ -125,6 +125,32 @@ public class Serwer{
                     if(tmp[0].equals("Informacja")){
                         String sql = "SELECT * FROM ALLIANCE."+tmp[1].toUpperCase()+" WHERE ID = "+tmp[2];
                         wyslij.println(db.opis(sql));
+                        wyslij.flush();
+                    }
+                    if(tmp[0].equals("ListaBudynkow")){
+                        wyslij.println(db.listaBudynkow());
+                        wyslij.flush();
+                    }
+                    if(tmp[0].equals("UploadBudynek")){
+                        db.updateBudynek(Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3]), Integer.parseInt(tmp[4]), tmp[5], Integer.parseInt(tmp[6]), tmp[7], nazwa);
+                        wyslij.println(db.zwroc("SELECT * FROM ALLIANCE.UZYTKOWNIK WHERE LOGIN ='"+nazwa+"';"));
+                        wyslij.flush();
+                    }
+                    if(tmp[0].equals("Kryjowka")){
+                        wyslij.println(db.kryjowka(Integer.parseInt(tmp[1])));
+                        wyslij.flush();
+                    }
+                    if(tmp[0].equals("Magazyn")){
+                        wyslij.println(db.magazyn(Integer.parseInt(tmp[1])));
+                        wyslij.flush();
+                    }
+                    if(tmp[0].equals("UploadMuryObronne")){
+                        db.updateMuryObronne(Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3]), Integer.parseInt(tmp[4]),Integer.parseInt(tmp[5]), nazwa);
+                        wyslij.println(db.zwroc("SELECT * FROM ALLIANCE.UZYTKOWNIK WHERE LOGIN ='"+nazwa+"';"));
+                        wyslij.flush();
+                    }
+                    if(tmp[0].equals("MuryObronne")){
+                        wyslij.println(db.muryObronne(Integer.parseInt(tmp[1])));
                         wyslij.flush();
                     }
                 }
