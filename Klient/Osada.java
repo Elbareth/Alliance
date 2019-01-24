@@ -12,6 +12,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -26,6 +27,7 @@ import javax.swing.SwingUtilities;
  * @author lenovo
  */
 //Button dla murow obronnych!!!!
+//Tutaj dodaj jeszcze thread to odczytu ilosci surowcow
 public class Osada extends JPanel{
     private JButton przycisk1 = new JButton();
     private JButton przycisk2 = new JButton();
@@ -60,6 +62,7 @@ public class Osada extends JPanel{
     private PrintWriter wyslij;
     private BufferedReader odbierz;
     private JFrame parent;
+    private Thread wat;
     public Osada(PrintWriter wyslij, BufferedReader odbierz, String linia){
         this.wyslij = serwus.getWyslij();
         this.odbierz = serwus.getOdbierz();
@@ -81,6 +84,8 @@ public class Osada extends JPanel{
         przycisk13.setName("PRZYCISK13");
         przycisk14.setName("PRZYCISK14");
         przycisk15.setName("PRZYCISK15");
+        wat = new Thread(new Watek());
+        wat.start();
         tlo = new JLabel(new ImageIcon(this.getClass().getResource("tloMAX.png")));
         tlo.setLayout(null);
         tlo.setBounds(0,0,1600,900);
@@ -138,6 +143,7 @@ public class Osada extends JPanel{
         createButton(przycisk15,500,600,31); 
         muryObronne = new JButton("Mury Obronne");
         muryObronne.setBounds(7,300,100,30);
+        muryObronne.addActionListener(new MuryObronneTmp(linia, muryObronne));
         tlo.add(muryObronne);
         add(tlo);
         setVisible(true);
@@ -147,6 +153,7 @@ public class Osada extends JPanel{
         button.setBounds(x, y, 200, 100);
         //button.setOpaque(true);
         //button.setContentAreaFilled(false);
+        //button.addActionListener(new Brak(linia, button));
         tlo.add(button);
     }
     private void checkIcon(JButton button, int poz){        
@@ -156,20 +163,34 @@ public class Osada extends JPanel{
             //button.setBackground(new Color(0,204,0));
             //button.setOpaque(true);
             button.setText("Wybuduj budynek");
+            button.addActionListener(new Brak(linia, button));
         }
         if(tmp[poz].equals("Ratusz")){            
             button.setIcon(new ImageIcon(this.getClass().getResource("ratusz.png")));
             button.setContentAreaFilled(false);
         }
         if(tmp[poz].equals("Magazyn")){            
-            button.setIcon(new ImageIcon(this.getClass().getResource("magazyn.png")));            
+            button.setIcon(new ImageIcon(this.getClass().getResource("magazyn.png")));
+            button.addActionListener(new MagazynTmp(linia, button));
             button.setContentAreaFilled(false);
         }
-        //Wiecej budynkow, takich jak
-        //Koszary
-        //Kryjowka
-        //Rynek
-        //Stajnia
+        if(tmp[poz].equals("Koszary")){
+            button.setIcon(new ImageIcon(this.getClass().getResource("koszary.png")));            
+            button.setContentAreaFilled(false);            
+        }
+        if(tmp[poz].equals("Kryjowka")){
+            button.setIcon(new ImageIcon(this.getClass().getResource("kryjowka.png")));            
+            button.setContentAreaFilled(false);
+            button.addActionListener(new KryjowkaTmp(linia,button));
+        }
+        if(tmp[poz].equals("Rynek")){
+            button.setIcon(new ImageIcon(this.getClass().getResource("rynek.png")));            
+            button.setContentAreaFilled(false);
+        }
+        if(tmp[poz].equals("Stajnia")){
+            button.setIcon(new ImageIcon(this.getClass().getResource("stajnia.png")));            
+            button.setContentAreaFilled(false);
+        }              
         //Palac
     }
     class Powrot implements ActionListener{
@@ -180,6 +201,87 @@ public class Osada extends JPanel{
             parent.add(new PolaSurowcow(wyslij, odbierz,linia));
             parent.validate();
             parent.repaint();
+        }        
+    }
+    class Brak implements ActionListener{
+        private String linia;
+        private JButton button;
+        public Brak(String linia, JButton button){
+            this.linia = linia;
+            this.button = button;
+        }
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, Osada.this);
+            parent.getContentPane().removeAll();            
+            parent.add(new BrakBudynku(wyslij, odbierz, linia, button.getName()));
+            parent.validate();
+            parent.repaint();
+        }        
+    }
+    class KryjowkaTmp implements ActionListener{
+        private String linia;
+        private JButton button;
+        public KryjowkaTmp(String linia, JButton button){
+            this.linia = linia;
+            this.button = button;
+        }
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, Osada.this);
+            parent.getContentPane().removeAll();            
+            parent.add(new Kryjowka(wyslij, odbierz, linia, Integer.parseInt(tmp[9]), button.getName()));
+            parent.validate();
+            parent.repaint();
+        }        
+    }
+    class MagazynTmp implements ActionListener{
+        private String linia;
+        private JButton button;
+        public MagazynTmp(String linia, JButton button){
+            this.linia = linia;
+            this.button = button;
+        }
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, Osada.this);
+            parent.getContentPane().removeAll();            
+            parent.add(new Magazyn(wyslij, odbierz, linia, Integer.parseInt(tmp[6]), button.getName()));
+            parent.validate();
+            parent.repaint();
+        }        
+    }
+    class MuryObronneTmp implements ActionListener{
+        private String linia;
+        private JButton button;
+        public MuryObronneTmp(String linia, JButton button){
+            this.linia = linia;
+            this.button = button;
+        }
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, Osada.this);
+            parent.getContentPane().removeAll();            
+            parent.add(new MuryObronne(wyslij, odbierz, linia, Integer.parseInt(tmp[10]), button.getName()));
+            parent.validate();
+            parent.repaint();
+        }        
+    }
+    class Watek implements Runnable{
+        @Override
+        public void run() {
+            String linia = "";
+            try{
+                while((linia=odbierz.readLine())!=null){
+                    String [] tmp = linia.split("@");
+                    if(tmp.length > 55){
+                        Osada.this.linia = linia;
+                    }
+                }
+            }
+            catch(IOException e){
+                e.printStackTrace();
+            }
         }        
     }
 }
