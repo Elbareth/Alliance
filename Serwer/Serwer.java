@@ -153,6 +153,31 @@ public class Serwer{
                         wyslij.println(db.muryObronne(Integer.parseInt(tmp[1])));
                         wyslij.flush();
                     }
+                    if(tmp[0].equals("Koszary")){                        
+                        wyslij.println(db.koszary(Integer.parseInt(tmp[1])));
+                        wyslij.flush();
+                    }
+                    if(tmp[0].equals("WojskoKoszary")){                        
+                        wyslij.println(db.listaKoszary());
+                        wyslij.flush();
+                    }
+                    if(tmp[0].equals("UploadJednostki")){
+                        db.uploadJednostki(Integer.parseInt(tmp[1]), Integer.parseInt(tmp[2]), Integer.parseInt(tmp[3]), Integer.parseInt(tmp[4]), tmp[5], Integer.parseInt(tmp[6]), nazwa);
+                        wyslij.println(db.zwroc("SELECT * FROM ALLIANCE.UZYTKOWNIK WHERE LOGIN ='"+nazwa+"';"));
+                        wyslij.flush();
+                    }
+                    if(tmp[0].equals("Stajnia")){
+                        wyslij.println(db.stajnia(Integer.parseInt(tmp[1])));
+                        wyslij.flush();
+                    }
+                    if(tmp[0].equals("WojskoStajnia")){
+                        wyslij.println(db.listaStajnia());
+                        wyslij.flush();
+                    }
+                    if(tmp[0].equals("Close")){
+                        listaGraczy.remove(nazwa);
+                        graczSocket.close();
+                    }
                 }
             }
             catch(IOException e){
