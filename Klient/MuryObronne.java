@@ -120,6 +120,7 @@ public class MuryObronne extends JPanel{
         panel1.add(Box.createRigidArea(new Dimension(100,0)));
         wyloguj = new JButton("Wyloguj się");
         wyloguj.setPreferredSize(new Dimension(150,30));
+        wyloguj.addActionListener(new Wyloguj());
         panel1.add(wyloguj);
         add(panel1);
         tytul = new JLabel("Mury Obronne poziom "+poziom);
@@ -216,7 +217,7 @@ public class MuryObronne extends JPanel{
             Integer zelazo = Integer.parseInt(zelazoIlosc.getText()) - Integer.parseInt(zelazoBuduj.getText());
             Integer zboze = Integer.parseInt(zbozeIlosc.getText()) - Integer.parseInt(zbozeBuduj.getText());
             if(drewno < 0 || glina < 0 || zelazo < 0 || zboze< 0){
-                JOptionPane.showMessageDialog(null,"Masz za mało surowców by wybudować kryjówkę");
+                JOptionPane.showMessageDialog(null,"Masz za mało surowców by wybudować mury obronne");
             }
             else{
                 drewnoIlosc.setText(drewno.toString());
@@ -239,6 +240,12 @@ public class MuryObronne extends JPanel{
                 parent.validate();
                 parent.repaint();
             }
+        }        
+    }
+    class Wyloguj implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            serwus.close();                    
         }        
     }
 }

@@ -155,6 +155,7 @@ public class Pole extends JPanel{
         panel1.add(Box.createRigidArea(new Dimension(100,0)));
         wyloguj = new JButton("Wyloguj się");
         wyloguj.setPreferredSize(new Dimension(150,30));
+        wyloguj.addActionListener(new Wyloguj());
         panel1.add(wyloguj);
         add(panel1);
         
@@ -450,6 +451,12 @@ public class Pole extends JPanel{
             parent.repaint();
             //Thread.currentThread().stop();
             //wat.stop();
+        }        
+    }
+    class Wyloguj implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            serwus.close();                    
         }        
     }
 }

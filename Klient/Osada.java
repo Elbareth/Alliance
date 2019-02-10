@@ -124,6 +124,7 @@ public class Osada extends JPanel{
         tlo.add(zbozeIlosc);       
         wyloguj = new JButton("Wyloguj się");
         wyloguj.setBounds(1400,5,150,30);
+        wyloguj.addActionListener(new Wyloguj());
         tlo.add(wyloguj);        
         //Dodaj buttony
         createButton(przycisk1,885,335,17);
@@ -175,7 +176,8 @@ public class Osada extends JPanel{
             button.setContentAreaFilled(false);
         }
         if(tmp[poz].equals("Koszary")){
-            button.setIcon(new ImageIcon(this.getClass().getResource("koszary.png")));            
+            button.setIcon(new ImageIcon(this.getClass().getResource("koszary.png"))); 
+            button.addActionListener(new KoszaryTmp(linia, button));
             button.setContentAreaFilled(false);            
         }
         if(tmp[poz].equals("Kryjowka")){
@@ -190,6 +192,7 @@ public class Osada extends JPanel{
         if(tmp[poz].equals("Stajnia")){
             button.setIcon(new ImageIcon(this.getClass().getResource("stajnia.png")));            
             button.setContentAreaFilled(false);
+            button.addActionListener(new StajniaTmp(linia, button));
         }              
         //Palac
     }
@@ -267,6 +270,43 @@ public class Osada extends JPanel{
             parent.repaint();
         }        
     }
+    class KoszaryTmp implements ActionListener{
+        private String linia;
+        private JButton button;
+
+        public KoszaryTmp(String linia, JButton button) {
+            this.linia = linia;
+            this.button = button;
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, Osada.this);
+            parent.getContentPane().removeAll();            
+            parent.add(new Koszary(wyslij, odbierz, linia, Integer.parseInt(tmp[7]), button.getName()));
+            parent.validate();
+            parent.repaint();
+        }        
+    }
+    class StajniaTmp implements ActionListener{
+        private String linia;
+        private JButton button;
+        
+        public StajniaTmp(String linia, JButton button){
+            this.linia = linia;
+            this.button = button;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, Osada.this);
+            parent.getContentPane().removeAll();            
+            parent.add(new Stajnia(wyslij, odbierz, linia, Integer.parseInt(tmp[8]), button.getName()));
+            parent.validate();
+            parent.repaint();
+        }
+        
+    }
     class Watek implements Runnable{
         @Override
         public void run() {
@@ -282,6 +322,12 @@ public class Osada extends JPanel{
             catch(IOException e){
                 e.printStackTrace();
             }
+        }        
+    }
+    class Wyloguj implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            serwus.close();                    
         }        
     }
 }

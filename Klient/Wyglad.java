@@ -6,7 +6,10 @@
 package alliancegracz;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
 /**
@@ -22,6 +25,12 @@ public class Wyglad extends JFrame{
         odbierz = server.getOdbierz();
         setSize(500,500);
         setTitle("Alliance");
+        try{
+             setIconImage(ImageIO.read(this.getClass().getResource("ikonaMini.png")));
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         add(new Logowanie(wyslij,odbierz));
         setVisible(true);

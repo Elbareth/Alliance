@@ -121,6 +121,7 @@ public class Kryjowka extends JPanel{
         panel1.add(Box.createRigidArea(new Dimension(100,0)));
         wyloguj = new JButton("Wyloguj się");
         wyloguj.setPreferredSize(new Dimension(150,30));
+        wyloguj.addActionListener(new Wyloguj());
         panel1.add(wyloguj);
         add(panel1);
         tytul = new JLabel("Kryjowka poziom "+poziom);
@@ -240,6 +241,12 @@ public class Kryjowka extends JPanel{
                 parent.validate();
                 parent.repaint();
             }
+        }        
+    }
+    class Wyloguj implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            serwus.close();                    
         }        
     }
 }

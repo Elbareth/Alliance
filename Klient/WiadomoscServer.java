@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -40,5 +41,18 @@ public class WiadomoscServer {
     public BufferedReader getOdbierz() {
         return odbierz;
     }
-    
+    public void close(){
+        wyslij.println("Close");
+        wyslij.flush();        
+        try{
+            wyslij.close();
+            odbierz.close();
+            gniazdo.close();
+            JOptionPane.showMessageDialog(null,"Zostałeś pomyślnie wylogowany");
+            System.exit(0);
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
+    }    
 }

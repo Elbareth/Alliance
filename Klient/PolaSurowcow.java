@@ -109,6 +109,7 @@ public class PolaSurowcow extends JPanel{
     private JButton mapa;
     private JFrame parent;
     private JLabel powitanie;
+    private WiadomoscServer serwus = new WiadomoscServer();
     public PolaSurowcow(PrintWriter wyslij, BufferedReader odbierz, String linia){
         pole1.setName("POLE1");
         pole2.setName("POLE2");
@@ -183,6 +184,7 @@ public class PolaSurowcow extends JPanel{
         panel1.add(Box.createRigidArea(new Dimension(100,0)));
         wyloguj = new JButton("Wyloguj się");
         wyloguj.setPreferredSize(new Dimension(150,30));
+        wyloguj.addActionListener(new Wyloguj());
         panel1.add(wyloguj);
         add(panel1); 
         add(Box.createRigidArea(new Dimension(0,20)));
@@ -365,6 +367,12 @@ public class PolaSurowcow extends JPanel{
             parent.add(new Osada(wyslij, odbierz, linia));
             parent.validate();
             parent.repaint();
+        }        
+    }
+    class Wyloguj implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            serwus.close();                    
         }        
     }
 }
