@@ -71,9 +71,7 @@ public class Kryjowka extends JPanel{
         this.pozycja = pozycja;
         tmp = linia.split("@");
         this.wyslij.println("Kryjowka@"+(poziom+1));
-        this.wyslij.flush();
-        wat = new Thread(new Watek());
-        wat.start();
+        this.wyslij.flush();        
         setLayout(new BoxLayout(this,BoxLayout.PAGE_AXIS));
         panel1 = new JPanel();
         panel1.setLayout(new FlowLayout());
@@ -173,6 +171,8 @@ public class Kryjowka extends JPanel{
         rozbuduj.add(zbozeBuduj);
         add(rozbuduj);
         setVisible(true);
+        wat = new Thread(new Watek());
+        wat.start();
     }
     class Powrot implements ActionListener{
         @Override
@@ -190,7 +190,9 @@ public class Kryjowka extends JPanel{
             String linia = "";
             try{
                 while((linia=odbierz.readLine())!=null){
+                    System.out.println("Tak "+linia);
                     String [] tmp = linia.split("@");
+                    System.out.println(tmp.length);
                     if(tmp[0].equals("Opis")){
                         drewnoBuduj.setText(tmp[1]);
                         glinaBuduj.setText(tmp[2]);
@@ -202,6 +204,13 @@ public class Kryjowka extends JPanel{
                     }
                     if(tmp.length > 55 ){
                         Kryjowka.this.linia = linia;
+                        String [] pom = linia.split("@");
+                        drewnoIlosc.setText(pom[1]);
+                        glinaIlosc.setText(pom[2]);
+                        zelazoIlosc.setText(pom[3]);
+                        zbozeIlosc.setText(pom[4]);                       
+                        validate();
+                        repaint();
                     }   
                 }
             }

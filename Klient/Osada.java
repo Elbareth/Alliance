@@ -316,6 +316,13 @@ public class Osada extends JPanel{
                     String [] tmp = linia.split("@");
                     if(tmp.length > 55){
                         Osada.this.linia = linia;
+                        String [] pom = linia.split("@");
+                        drewnoIlosc.setText(pom[1]);
+                        glinaIlosc.setText(pom[2]);
+                        zelazoIlosc.setText(pom[3]);
+                        zbozeIlosc.setText(pom[4]);                       
+                        validate();
+                        repaint();
                     }
                 }
             }

@@ -252,8 +252,8 @@ public class Koszary extends JPanel{
                     zbozeIloscLabel = new JLabel[tak.length];
                     zbozeIkonaLabel = new JLabel[tak.length];
                     wybuduj = new JButton[tak.length];
-                    for(int i=0;i<tak.length;i++){                        
-                        String [] tmp = tak[i].split("@");
+                    for(int i=0;i<tak.length;i++){                       
+                        String [] tmp = tak[i].split("@");                       
                         if(tmp[0].equals("Opis")){
                             drewnoBuduj.setText(tmp[1]);
                             glinaBuduj.setText(tmp[2]);
@@ -270,7 +270,14 @@ public class Koszary extends JPanel{
                             createList(tmp[0], tytulLabel[i],panelGlow[i], tmp[8],tmp[7], opisLabel[i], ilosc[i], buttonIlosc[i], drewnoIloscLabel[i], drewnoIkonaLabel[i], tmp[3], glinaIloscLabel[i],glinaIkonaLabel[i], tmp[4], zelazoIloscLabel[i], zelazoIkonaLabel[i], tmp[5], zbozeIloscLabel[i], zbozeIkonaLabel[i], tmp[6], wybuduj[i]);
                         }
                         if(tmp.length > 55 ){
-                            Koszary.this.linia = linia;
+                            Koszary.this.linia = linia;                            
+                            String [] pom = linia.split("@");
+                            drewnoIlosc.setText(pom[1]);
+                            glinaIlosc.setText(pom[2]);
+                            zelazoIlosc.setText(pom[3]);
+                            zbozeIlosc.setText(pom[4]);                            
+                            validate();
+                            repaint();
                         }
                     }
                     

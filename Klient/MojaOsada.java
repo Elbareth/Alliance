@@ -8,12 +8,12 @@ package alliancegracz;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Vector;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -21,54 +21,52 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
 /**
  *
  * @author lenovo
  */
-public class PrzegladWojsk extends JPanel{
+public class MojaOsada extends JPanel{
     private PrintWriter wyslij;
     private BufferedReader odbierz;
     private String linia;
     private String [] tmp;
-    private WiadomoscServer serwus = new WiadomoscServer();
+    private String nazwa;
+    private String login;
     private Thread wat;
-    private JPanel panel1;
-    private JLabel drewnoIlosc;
     private JLabel drewnoMini;
-    private JLabel glinaIlosc;
+    private JLabel drewnoIlosc;
     private JLabel glinaMini;
-    private JLabel zelazoIlosc;
+    private JLabel glinaIlosc;
     private JLabel zelazoMini;
-    private JLabel zbozeIlosc;
+    private JLabel zelazoIlosc;
     private JLabel zbozeMini;
-    private JButton wyloguj;
+    private JLabel zbozeIlosc;
+    private JPanel panel1;
     private JButton powrot;
-    private String typ;
+    private JButton wyloguj;
     private JFrame parent;
-    private Integer poziom;
-    private String pozycja;
-    private Vector<String> kolumny = new Vector<String>();
-    private Vector<Vector<String>> wnetrze = new Vector<Vector<String>>();
-    private JTable tabelka;
-    private String [] lista = {"Jednostka Lekka", "Jednostka Ciężka", "Łucznik", "Tropiciel", "Kawalerzysta", "Osadnik"};
-    public PrzegladWojsk(PrintWriter wyslij, BufferedReader odbierz, String linia, String typ, Integer poziom, String pozycja){
+    private JLabel nazwaLabel;
+    private JLabel wlascicielLabel;
+    private JButton doOsady;
+    private JButton wyslijHandlarzy;
+    private JButton wyslijWojsko;
+    private Integer id;
+    private JLabel obraz;
+    private WiadomoscServer serwus = new WiadomoscServer();
+    public MojaOsada(PrintWriter wyslij, BufferedReader odbierz, String linia, String nazwa, String login, Integer id){
         this.wyslij = serwus.getWyslij();
         this.odbierz = serwus.getOdbierz();
-        this.typ = typ;
         this.linia = linia;
-        this.poziom = poziom;
-        this.pozycja = pozycja;
         tmp = linia.split("@");
-        wat = new Thread(new Watek());
-        wat.start();
+        this.nazwa = nazwa;
+        this.login = login;
+        this.id = id;
         setLayout(new BoxLayout(this,BoxLayout.PAGE_AXIS));
         panel1 = new JPanel();
         panel1.setLayout(new FlowLayout());
-        panel1.setPreferredSize(new Dimension(1600,0));
+        panel1.setPreferredSize(new Dimension(1000,160));
         panel1.setAlignmentX(Component.CENTER_ALIGNMENT);
         powrot = new JButton("<<-");
         powrot.setPreferredSize(new Dimension(50,50));
@@ -115,36 +113,38 @@ public class PrzegladWojsk extends JPanel{
         wyloguj.addActionListener(new Wyloguj());
         panel1.add(wyloguj);
         add(panel1);
-        kolumny.add("Nazwa");
-        kolumny.add("Ilość");
-        for(int i=56;i<62;i++){
-            Vector<String> tak = new Vector<String>();
-            tak.add(lista[i-56]);
-            tak.add(tmp[i]);
-            wnetrze.add(tak);
-        }
-        tabelka = new JTable(wnetrze, kolumny){
-            @Override
-            public boolean isCellEditable(int row, int column){
-                return false;
-            }
-        };
-        tabelka.setMaximumSize(new Dimension(500,300));
-        tabelka.setPreferredScrollableViewportSize(new Dimension(500,300));
-        tabelka.setFillsViewportHeight(true);
-        JScrollPane scroll = new JScrollPane(tabelka);
-        add(scroll);
+        nazwaLabel = new JLabel("Nazwa: "+nazwa);
+        nazwaLabel.setPreferredSize(new Dimension(300,50));
+        nazwaLabel.setFont(new Font("Lucida Handwriting kursywa",Font.BOLD,20));
+        add(nazwaLabel);
+        wlascicielLabel = new JLabel("To Twoja osada "+login);
+        wlascicielLabel.setPreferredSize(new Dimension(300,50));
+        wlascicielLabel.setFont(new Font("Lucida Handwriting kursywa",Font.BOLD,20));
+        add(wlascicielLabel);
+        obraz = new JLabel(new ImageIcon(this.getClass().getResource("mojaOsadaMax.png")));
+        obraz.setPreferredSize(new Dimension(650,400));
+        add(obraz);
+        doOsady = new JButton("Przejdź do mojej osady");
+        doOsady.setPreferredSize(new Dimension(200,50));
+        add(doOsady);
+        wyslijHandlarzy = new JButton("Wyślij Handlarzy");
+        wyslijHandlarzy.setPreferredSize(new Dimension(200,50));
+        add(wyslijHandlarzy);
+        wyslijWojsko = new JButton("Wyślij Wojsko");
+        wyslijWojsko.setPreferredSize(new Dimension(200,50));
+        add(wyslijWojsko);
+        wat = new Thread(new Watek());
+        wat.start();
     }
-    //Tylko do uzupełnienia surowców
-    class Watek implements Runnable{        
+    class Watek implements Runnable{
         @Override
         public void run() {
             String linia = "";
             try{
-                while((linia = odbierz.readLine())!= null){
+                while((linia = odbierz.readLine())!=null){
                     String [] tmp = linia.split("@");
-                    if(tmp.length > 55){
-                        PrzegladWojsk.this.linia = linia;
+                    if(tmp.length > 55 ){
+                        MojaOsada.this.linia = linia;
                         String [] pom = linia.split("@");
                         drewnoIlosc.setText(pom[1]);
                         glinaIlosc.setText(pom[2]);
@@ -163,29 +163,17 @@ public class PrzegladWojsk extends JPanel{
     class Powrot implements ActionListener{
         @Override
         public void actionPerformed(ActionEvent e) {
-            if(typ.equals("Koszary")){
-                parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, PrzegladWojsk.this);
-                parent.getContentPane().removeAll();            
-                parent.add(new Koszary(wyslij, odbierz,linia, poziom, pozycja));
-                parent.validate();
-                parent.repaint();
-            }
-            if(typ.equals("Stajnia")){
-                parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, PrzegladWojsk.this);
-                parent.getContentPane().removeAll();            
-                parent.add(new Stajnia(wyslij, odbierz,linia, poziom, pozycja));
-                parent.validate();
-                parent.repaint();
-            }
-            if(typ.equals("Palac")){
-                //Gdy juz bede miec palac
-            }
+            parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, MojaOsada.this);
+            parent.getContentPane().removeAll();            
+            parent.add(new Mapa(wyslij, odbierz,linia));
+            parent.validate();
+            parent.repaint();
         }        
     }
     class Wyloguj implements ActionListener{
         @Override
         public void actionPerformed(ActionEvent e) {
-            serwus.close();                    
+            serwus.close();  
         }        
     }
 }

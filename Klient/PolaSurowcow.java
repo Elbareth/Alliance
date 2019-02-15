@@ -261,6 +261,7 @@ public class PolaSurowcow extends JPanel{
         panel2.add(surowce);
         mapa = new JButton(new ImageIcon(this.getClass().getResource("mapaMini.jpg")));
         mapa.setPreferredSize(new Dimension(160,100));
+        mapa.addActionListener(new MapaTmp());
         panel2.add(mapa);
         add(panel2);
     }
@@ -326,9 +327,17 @@ public class PolaSurowcow extends JPanel{
             String linia = "";
             try{
                 while((linia=odbierz.readLine())!=null){
-                    String [] tmp = linia.split("@");
+                    System.out.println("Taka" +linia);
+                    String [] tmp = linia.split("@");                    
                     if(tmp.length > 55){
                         PolaSurowcow.this.linia = linia;
+                        String [] pom = linia.split("@");
+                        drewnoIlosc.setText(pom[1]);
+                        glinaIlosc.setText(pom[2]);
+                        zelazoIlosc.setText(pom[3]);
+                        zbozeIlosc.setText(pom[4]);                        
+                        validate();
+                        repaint();
                     }
                 }
             }
@@ -373,6 +382,16 @@ public class PolaSurowcow extends JPanel{
         @Override
         public void actionPerformed(ActionEvent e) {
             serwus.close();                    
+        }        
+    }
+    class MapaTmp implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, PolaSurowcow.this);
+            parent.getContentPane().removeAll();            
+            parent.add(new Mapa(wyslij, odbierz, linia));
+            parent.validate();
+            parent.repaint();
         }        
     }
 }

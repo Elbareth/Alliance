@@ -137,13 +137,16 @@ public class Zarejestruj extends JPanel{
                     if(linia.equals("Uzytkownik istnieje")){
                         JOptionPane.showMessageDialog(null,"Użytkownik o takiej nazwie już istnieje");                        
                     }
+                    if(linia.equals("Brak wolnych miejsc")){
+                        JOptionPane.showMessageDialog(null, "Przepraszamy. Nie ma już wolnych miejsc. Zapraszama do następnej edycji gry");
+                    }
                     if(linia.equals("Wszystko ok")){
                         parent = (JFrame) SwingUtilities.getAncestorOfClass(JFrame.class, Zarejestruj.this);
                         parent.getContentPane().removeAll();            
                         parent.add(new Logowanie(wyslij, odbierz));
                         parent.validate();
                         parent.repaint();
-                    
+                        Thread.currentThread().stop();
                     }                   
                 }
             }
