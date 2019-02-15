@@ -36,13 +36,15 @@ public class Serwer{
     public void polacz(BazaDanych db){
         this.db = db;
          listaGraczy = new HashMap <String,PrintWriter>(); 
+         Thread licznik = new Thread (new Licznik());
+         licznik.start();
          try{
              ServerSocket serverSocket = new ServerSocket(1234);
              while(true){
                 graczSocket = serverSocket.accept();// W tym miejscu akceptujemy gracza    
                 wyslij(graczSocket);
                 Thread thread = new Thread(new Odbierz(graczSocket));
-                thread.start();
+                thread.start();                
              }
          }
          catch(IOException e){
@@ -98,6 +100,12 @@ public class Serwer{
                         nazwa = tmp[1];
                         String sql = "SELECT COUNT (*) FROM ALLIANCE.UZYTKOWNIK WHERE LOGIN ='"+tmp[1]+"';";
                         int licznik = db.licznik(sql);
+                        //Dodajemy naszego gracza do mapy
+                        String tak = db.addMapa(tmp[1]);
+                        if(tak.equals("false")){
+                            wyslij.println("Brak wolnych miejsc");
+                            wyslij.flush();
+                        }
                         if(licznik >= 1){
                             wyslij.println("Uzytkownik istnieje");
                             wyslij.flush();
@@ -178,11 +186,135 @@ public class Serwer{
                         listaGraczy.remove(nazwa);
                         graczSocket.close();
                     }
+                    if(tmp[0].equals("Mapa")){
+                        wyslij.println(db.mapa());
+                        wyslij.flush();
+                    }
                 }
             }
             catch(IOException e){
                 e.printStackTrace();
             }
         }        
+    }
+    class Licznik implements Runnable{
+        //Miejsce gdzie przechowujemy ile mamy na godzine
+        //To będzie dokładnie ten sam identyfikator co u uzytkownika
+        private Float [] drewno;
+        private Float [] glina;
+        private Float [] zelazo;
+        private Float [] zboze;
+        private Float [] drewnoTmp;
+        private Float [] glinaTmp;
+        private Float [] zelazoTmp;
+        private Float [] zbozeTmp;
+        @Override
+        public void run(){            
+            //Pobieram liste wszystkich graczy z bazy danych
+            String tmp = db.listaGraczy();
+            String [] lista = tmp.split("@");
+            drewno = new Float[lista.length];
+            glina = new Float[lista.length];
+            zelazo = new Float[lista.length];
+            zboze = new Float[lista.length];
+            drewnoTmp = new Float[lista.length];
+            glinaTmp = new Float[lista.length];
+            zelazoTmp = new Float[lista.length];
+            zbozeTmp = new Float[lista.length];
+            for(int i=0;i<lista.length;i++){                
+                String cos = "SELECT * FROM ALLIANCE.UZYTKOWNIK WHERE LOGIN = '"+lista[i]+"';";
+                String wszystko = db.zwroc(cos);
+                String [] tniemy = wszystko.split("@");
+                //Teraz już wiemy ile poszczegolny uzytkownik ma na godzine
+                //Dziele na 3600 by wiedziec jaki jest przyrost co sekunde
+                //drewno[i] = Float.parseFloat(tniemy[12]) / 3600;
+                drewno[i] = Float.parseFloat(tniemy[12]) / 3600;
+                glina[i] = Float.parseFloat(tniemy[13]) / 3600;
+                zelazo[i] = Float.parseFloat(tniemy[14]) / 3600;
+                zboze[i] = Float.parseFloat(tniemy[15]) / 3600; 
+                drewnoTmp[i] = 0F;
+                glinaTmp[i] = 0F;
+                zelazoTmp[i] = 0F;
+                zbozeTmp[i] = 0F;
+                //System.out.println("Drewno "+drewno[i]+" Glina "+glina[i]+ " Żelazo "+zelazo[i]+" Zboże "+zboze[i]+" dla użytkownika "+lista[i]);
+            }
+            //liczymy ile czasu uplynelo odkad wlaczylismy serwer
+            //Co z czasem? 
+            long start = System.currentTimeMillis();
+            while(true){
+                long tmpSek = System.currentTimeMillis() - start;
+                float sekundka = tmpSek/1000F;
+                start = System.currentTimeMillis(); 
+                //System.out.println("Sekundka " + sekundka);
+                //Dla każdego gracza liczymy ile ma surowcow
+                for(int i=0;i<lista.length;i++){
+                    //Liczymy przyrost w ciagu sekundy dla kazdego gracza                     
+                    drewnoTmp[i] = drewnoTmp[i] + drewno[i]*sekundka;
+                    glinaTmp[i] = glinaTmp[i] + glina[i]*sekundka;
+                    zelazoTmp[i] = zelazoTmp[i] + zelazo[i]*sekundka;
+                    zbozeTmp[i] = zbozeTmp[i] + zboze[i]*sekundka;                                    
+                    //System.out.println(" Po Drewno "+drewnoTmp[i]+" Glina "+glinaTmp[i]+ " Żelazo "+zelazoTmp[i]+" Zboże "+zbozeTmp[i]+" dla użytkownika "+lista[i]);                    
+                    if(drewnoTmp[i]>1){                        
+                        //tu wywowule funkcje dodajaca do bazy danych
+                        db.addSurowce(Math.round(drewnoTmp[i]), "DREWNO", lista[i]);                        
+                        drewnoTmp[i] = 0F; // zeruje by mozna bylo dalej liczyc                        
+                        //wysylam do danego uzytkownika nowa wartosc surowcow
+                        //String tmpSQL = "SELECT * FROM ALLIANCE.UZYTKOWNIK WHERE LOGIN = '"+lista[i]+"';";
+                        //sprawdznie czy to ten user!!!
+                        if(lista[i].equals(nazwa)){
+                            //System.out.println("W if");
+                            String tmpSQL = "SELECT * FROM ALLIANCE.UZYTKOWNIK WHERE LOGIN = '"+nazwa+"';";
+                            wyslij.println(db.zwroc(tmpSQL));
+                            wyslij.flush();
+                        }
+                    }
+                    if(glinaTmp[i]>1){
+                        //tu wywowule funkcje dodajaca do bazy danych
+                        db.addSurowce(Math.round(glinaTmp[i]), "GLINA", lista[i]);
+                        glinaTmp[i] = 0F; // zeruje by mozna bylo dalej liczyc
+                        //wysylam do danego uzytkownika nowa wartosc surowcow
+                        //String tmpSQL = "SELECT * FROM ALLIANCE.UZYTKOWNIK WHERE LOGIN = '"+lista[i]+"';";
+                        if(lista[i].equals(nazwa)){
+                            System.out.println("W if");
+                            String tmpSQL = "SELECT * FROM ALLIANCE.UZYTKOWNIK WHERE LOGIN = '"+nazwa+"';";
+                            wyslij.println(db.zwroc(tmpSQL));
+                            wyslij.flush();
+                        }
+                    }
+                    if(zelazoTmp[i]>1){
+                        //tu wywowule funkcje dodajaca do bazy danych
+                        db.addSurowce(Math.round(zelazoTmp[i]), "ZELAZO", lista[i]);
+                        zelazoTmp[i] = 0F; // zeruje by mozna bylo dalej liczyc
+                        //wysylam do danego uzytkownika nowa wartosc surowcow
+                        //String tmpSQL = "SELECT * FROM ALLIANCE.UZYTKOWNIK WHERE LOGIN = '"+lista[i]+"';";
+                        if(lista[i].equals(nazwa)){
+                            System.out.println("W if");
+                            String tmpSQL = "SELECT * FROM ALLIANCE.UZYTKOWNIK WHERE LOGIN = '"+nazwa+"';";
+                            wyslij.println(db.zwroc(tmpSQL));
+                            wyslij.flush();
+                        }
+                    }
+                    if(zbozeTmp[i]>1){
+                        //tu wywowule funkcje dodajaca do bazy danych
+                        db.addSurowce(Math.round(zbozeTmp[i]), "ZBOZE", lista[i]);
+                        zbozeTmp[i] = 0F; // zeruje by mozna bylo dalej liczyc
+                        //wysylam do danego uzytkownika nowa wartosc surowcow
+                        //String tmpSQL = "SELECT * FROM ALLIANCE.UZYTKOWNIK WHERE LOGIN = '"+lista[i]+"';";
+                        if(lista[i].equals(nazwa)){
+                            System.out.println("W if");
+                            String tmpSQL = "SELECT * FROM ALLIANCE.UZYTKOWNIK WHERE LOGIN = '"+nazwa+"';";
+                            wyslij.println(db.zwroc(tmpSQL));
+                            wyslij.flush();
+                        }
+                    }
+                    try{
+                        Thread.sleep(20);
+                    }
+                    catch(InterruptedException e){
+                        e.printStackTrace();
+                    }                    
+                }
+            }
+        }
     }
 }
